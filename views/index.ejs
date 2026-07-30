@@ -2,20 +2,76 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>ユーザー一覧</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="毎日の支出を記録するシンプルな家計簿">
+  <title>わたしの家計簿</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
 </head>
 <body>
-  <h1>ユーザー一覧</h1>
-  <ul>
-    <% users.forEach(user => { %>
-      <li>ID: <%= user.id %> - 名前: <%= user.name %></li>
-    <% }) %>
-  </ul>
+  <main class="page">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">MY EXPENSE TRACKER</p>
+        <h1>わたしの家計簿</h1>
+        <p class="subtitle">今日使ったお金を、かんたんに記録。</p>
+      </div>
+      <section class="summary" aria-labelledby="summary-title">
+        <p id="summary-title">今月の支出</p>
+        <strong id="monthly-total">読み込み中...</strong>
+      </section>
+    </header>
 
-  <h2>ユーザーを追加するぞ</h2>
-  <form action="/users" method="post">
-    <input type="text" name="name" placeholder="名前を入力" required>
-    <button type="submit">追加</button>
-  </form>
+    <div class="content-grid">
+      <section class="card form-card" aria-labelledby="form-title">
+        <h2 id="form-title">支出を追加</h2>
+        <form id="expense-form">
+          <label>
+            金額
+            <span class="amount-input">
+              <input id="amount" name="amount" type="number" min="1" step="1" placeholder="1200" required>
+              <span>円</span>
+            </span>
+          </label>
+
+          <label>
+            カテゴリ
+            <select id="category" name="category" required>
+              <option value="">選択してください</option>
+              <option value="食費">食費</option>
+              <option value="交通費">交通費</option>
+              <option value="日用品">日用品</option>
+              <option value="娯楽">娯楽</option>
+              <option value="光熱費">光熱費</option>
+              <option value="その他">その他</option>
+            </select>
+          </label>
+
+          <label>
+            日付
+            <input id="date" name="date" type="date" required>
+          </label>
+
+          <label>
+            メモ <span class="optional">任意</span>
+            <input id="memo" name="memo" type="text" maxlength="500" placeholder="ランチ、電車代など">
+          </label>
+
+          <button id="submit-button" type="submit">記録する</button>
+          <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="card list-card" aria-labelledby="list-title">
+        <div class="section-heading">
+          <h2 id="list-title">支出一覧</h2>
+          <span id="expense-count"></span>
+        </div>
+        <div id="expense-list" class="expense-list">
+          <p class="empty-message">読み込み中...</p>
+        </div>
+      </section>
+    </div>
+  </main>
 </body>
 </html>

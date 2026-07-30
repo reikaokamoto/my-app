@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -12,13 +7,12 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id   Int    @id @default(autoincrement())
-  name String
-}
+model Expense {
+  id       Int      @id @default(autoincrement())
+  amount   Int
+  category String   @db.VarChar(100)
+  date     DateTime @db.Date
+  memo     String?  @db.Text
 
-model Record {
-  id     Int    @id @default(autoincrement())
-  item   String
-  amount Int
+  @@map("expenses")
 }
