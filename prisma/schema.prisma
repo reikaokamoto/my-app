@@ -16,3 +16,9 @@ model User {
   id   Int    @id @default(autoincrement())
   name String
 }
+
+model Record {
+  id     Int    @id @default(autoincrement())
+  item   String
+  amount Int
+}
