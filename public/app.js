@@ -8,6 +8,21 @@ const formMessage = document.querySelector("#form-message");
 const expenseList = document.querySelector("#expense-list");
 const expenseCount = document.querySelector("#expense-count");
 const monthlyTotal = document.querySelector("#monthly-total");
+const donutRing = document.querySelector("#donut-ring");
+const categoryLegend = document.querySelector("#category-legend");
+const chartMonth = document.querySelector("#chart-month");
+const monthlyChart = document.querySelector("#monthly-chart");
+const monthlyLegend = document.querySelector("#monthly-legend");
+
+const CATEGORY_COLORS = {
+  食費: "#df8d68",
+  交通費: "#679f82",
+  日用品: "#dfbf5d",
+  娯楽: "#8574ad",
+  光熱費: "#6697b8",
+  その他: "#9ba39f",
+};
+const FALLBACK_COLORS = ["#c77c92", "#6d9a9d", "#a58970", "#7693aa"];
 
 const today = new Date();
 const localToday = new Date(today.getTime() - today.getTimezoneOffset() * 60_000)
@@ -27,6 +42,48 @@ const formatDate = (date) => {
   return `${year}/${month}/${day}`;
 };
 
+const formatMonth = (month) => {
+  const [year, monthNumber] = month.split("-");
+  return `${year}年${Number(monthNumber)}月`;
+};
+
+const getCategoryColor = (category) => {
+  if (CATEGORY_COLORS[category]) return CATEGORY_COLORS[category];
+
+  const colorIndex = [...category].reduce(
+    (total, character) => total + character.codePointAt(0),
+    0,
+  );
+  return FALLBACK_COLORS[colorIndex % FALLBACK_COLORS.length];
+};
+
+const getRecentMonths = () =>
+  [2, 1, 0].map((monthsAgo) => {
+    const date = new Date(today.getFullYear(), today.getMonth() - monthsAgo, 1);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+  });
+
+const summarizeByCategory = (expenses, month) => {
+  const totals = new Map();
+
+  expenses
+    .filter((expense) => expense.date.slice(0, 7) === month)
+    .forEach((expense) => {
+      totals.set(
+        expense.category,
+        (totals.get(expense.category) ?? 0) + expense.amount,
+      );
+    });
+
+  return [...totals.entries()]
+    .map(([category, amount]) => ({ category, amount }))
+    .sort(
+      (first, second) =>
+        second.amount - first.amount ||
+        first.category.localeCompare(second.category, "ja"),
+    );
+};
+
 const fetchJson = async (url, options) => {
   const response = await fetch(url, options);
   const data = await response.json();
@@ -36,6 +93,28 @@ const fetchJson = async (url, options) => {
   }
 
   return data;
+};
+
+const createLegendItem = ({ category, amount }, showAmount = true) => {
+  const item = document.createElement("div");
+  item.className = "legend-item";
+
+  const dot = document.createElement("span");
+  dot.className = "legend-dot";
+  dot.style.backgroundColor = getCategoryColor(category);
+
+  const label = document.createElement("span");
+  label.textContent = category;
+
+  item.append(dot, label);
+
+  if (showAmount) {
+    const value = document.createElement("strong");
+    value.textContent = formatMoney(amount);
+    item.append(value);
+  }
+
+  return item;
 };
 
 const renderExpenses = (expenses) => {
@@ -75,20 +154,115 @@ const renderExpenses = (expenses) => {
   });
 };
 
-const loadExpenses = async () => {
-  const expenses = await fetchJson("/expenses");
-  renderExpenses(expenses);
+const renderDonut = (expenses) => {
+  const currentMonth = localToday.slice(0, 7);
+  const categories = summarizeByCategory(expenses, currentMonth);
+  const total = categories.reduce((sum, category) => sum + category.amount, 0);
+
+  chartMonth.textContent = formatMonth(currentMonth);
+  monthlyTotal.textContent = formatMoney(total);
+  categoryLegend.replaceChildren();
+
+  if (total === 0) {
+    donutRing.style.background = "conic-gradient(#e5eae6 0 100%)";
+    const empty = document.createElement("p");
+    empty.className = "legend-empty";
+    empty.textContent = "今月の支出はまだありません。";
+    categoryLegend.append(empty);
+    return;
+  }
+
+  let start = 0;
+  const segments = categories.map(({ category, amount }) => {
+    const end = start + (amount / total) * 100;
+    const segment = `${getCategoryColor(category)} ${start}% ${end}%`;
+    start = end;
+    return segment;
+  });
+
+  donutRing.style.background =
+    `conic-gradient(from -90deg, ${segments.join(", ")})`;
+  categories.forEach((category) =>
+    categoryLegend.append(createLegendItem(category)),
+  );
 };
 
-const loadSummary = async () => {
-  const month = localToday.slice(0, 7);
-  const summary = await fetchJson(`/expenses/summary?month=${month}`);
-  monthlyTotal.textContent = formatMoney(summary.total);
+const renderMonthlyChart = (expenses) => {
+  const months = getRecentMonths();
+  const summaries = months.map((month) => {
+    const categories = summarizeByCategory(expenses, month);
+    return {
+      month,
+      categories,
+      total: categories.reduce((sum, category) => sum + category.amount, 0),
+    };
+  });
+  const maxTotal = Math.max(...summaries.map(({ total }) => total), 1);
+
+  monthlyChart.replaceChildren();
+  monthlyLegend.replaceChildren();
+
+  summaries.forEach(({ month, categories, total }) => {
+    const monthBar = document.createElement("div");
+    monthBar.className = "month-bar";
+
+    const totalLabel = document.createElement("span");
+    totalLabel.className = "bar-total";
+    totalLabel.textContent = formatMoney(total);
+
+    const track = document.createElement("div");
+    track.className = "bar-track";
+
+    const stack = document.createElement("div");
+    stack.className = "bar-stack";
+    stack.setAttribute(
+      "aria-label",
+      `${formatMonth(month)}の支出合計 ${formatMoney(total)}`,
+    );
+
+    categories.forEach(({ category, amount }) => {
+      const segment = document.createElement("div");
+      segment.className = "bar-segment";
+      segment.style.height = `${(amount / maxTotal) * 100}%`;
+      segment.style.backgroundColor = getCategoryColor(category);
+      segment.title = `${category}: ${formatMoney(amount)}`;
+      stack.append(segment);
+    });
+
+    const monthLabel = document.createElement("span");
+    monthLabel.className = "month-label";
+    monthLabel.textContent = formatMonth(month);
+
+    track.append(stack);
+    monthBar.append(totalLabel, track, monthLabel);
+    monthlyChart.append(monthBar);
+  });
+
+  const usedCategories = [
+    ...new Set(
+      summaries.flatMap(({ categories }) =>
+        categories.map(({ category }) => category),
+      ),
+    ),
+  ];
+  usedCategories.forEach((category) =>
+    monthlyLegend.append(createLegendItem({ category, amount: 0 }, false)),
+  );
+};
+
+const loadDashboard = async () => {
+  const expenses = await fetchJson("/expenses");
+  renderExpenses(expenses);
+  renderDonut(expenses);
+  renderMonthlyChart(expenses);
 };
 
 const showLoadError = () => {
   monthlyTotal.textContent = "取得できませんでした";
-  expenseList.innerHTML = '<p class="empty-message error">データを読み込めませんでした。</p>';
+  expenseList.innerHTML =
+    '<p class="empty-message error">データを読み込めませんでした。</p>';
+  monthlyChart.innerHTML =
+    '<p class="empty-message error">グラフを読み込めませんでした。</p>';
 };
 
 form.addEventListener("submit", async (event) => {
@@ -114,7 +288,7 @@ form.addEventListener("submit", async (event) => {
     memoInput.value = "";
     formMessage.textContent = "支出を記録しました。";
     formMessage.classList.add("success");
-    await Promise.all([loadExpenses(), loadSummary()]);
+    await loadDashboard();
     amountInput.focus();
   } catch (error) {
     formMessage.textContent =
@@ -125,4 +299,4 @@ form.addEventListener("submit", async (event) => {
   }
 });
 
-Promise.all([loadExpenses(), loadSummary()]).catch(showLoadError);
+loadDashboard().catch(showLoadError);
