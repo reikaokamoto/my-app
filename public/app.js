@@ -15,14 +15,14 @@ const monthlyChart = document.querySelector("#monthly-chart");
 const monthlyLegend = document.querySelector("#monthly-legend");
 
 const CATEGORY_COLORS = {
-  食費: "#df8d68",
-  交通費: "#679f82",
-  日用品: "#dfbf5d",
-  娯楽: "#8574ad",
-  光熱費: "#6697b8",
-  その他: "#9ba39f",
+  食費: "#ff8a65",
+  交通費: "#4db6ac",
+  日用品: "#ffd54f",
+  娯楽: "#ab79d6",
+  光熱費: "#42a5f5",
+  その他: "#f06292",
 };
-const FALLBACK_COLORS = ["#c77c92", "#6d9a9d", "#a58970", "#7693aa"];
+const FALLBACK_COLORS = ["#ffb74d", "#4dd0e1", "#81c784", "#ba68c8"];
 
 const today = new Date();
 const localToday = new Date(today.getTime() - today.getTimezoneOffset() * 60_000)
@@ -172,16 +172,20 @@ const renderDonut = (expenses) => {
     return;
   }
 
-  let start = 0;
+  let startAngle = 0;
   const segments = categories.map(({ category, amount }) => {
-    const end = start + (amount / total) * 100;
-    const segment = `${getCategoryColor(category)} ${start}% ${end}%`;
-    start = end;
+    const segmentAngle = (amount / total) * 360;
+    const endAngle = startAngle + segmentAngle;
+    const separatorAngle = Math.min(0.6, segmentAngle * 0.15);
+    const colorEndAngle = endAngle - separatorAngle;
+    const segment =
+      `${getCategoryColor(category)} ${startAngle}deg ${colorEndAngle}deg, ` +
+      `#fff ${colorEndAngle}deg ${endAngle}deg`;
+    startAngle = endAngle;
     return segment;
   });
 
-  donutRing.style.background =
-    `conic-gradient(from -90deg, ${segments.join(", ")})`;
+  donutRing.style.background = `conic-gradient(${segments.join(", ")})`;
   categories.forEach((category) =>
     categoryLegend.append(createLegendItem(category)),
   );
