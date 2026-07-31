@@ -11,9 +11,17 @@
 <body>
   <main class="page">
     <header class="hero">
-      <p class="eyebrow">MY EXPENSE TRACKER</p>
-      <h1>わたしの家計簿</h1>
-      <p class="subtitle">今日使ったお金を、かんたんに記録。</p>
+      <div>
+        <p class="eyebrow">MY EXPENSE TRACKER</p>
+        <h1>わたしの家計簿</h1>
+        <p class="subtitle">今日使ったお金を、かんたんに記録。</p>
+      </div>
+      <div class="account-menu">
+        <span><%= email %></span>
+        <form method="post" action="/logout">
+          <button type="submit" class="logout-button">ログアウト</button>
+        </form>
+      </div>
     </header>
 
     <div class="dashboard-grid">

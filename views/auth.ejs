@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="家計簿へのログイン">
+  <title><%= mode === "register" ? "新規登録" : "ログイン" %> | わたしの家計簿</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="auth-page">
+  <main class="auth-container">
+    <section class="card auth-card">
+      <p class="eyebrow">MY EXPENSE TRACKER</p>
+      <h1>わたしの家計簿</h1>
+      <p class="auth-description">
+        <%= mode === "register"
+          ? "アカウントを作成して、自分だけの家計簿を始めましょう。"
+          : "登録したメールアドレスとパスワードでログインしてください。" %>
+      </p>
+
+      <h2><%= mode === "register" ? "新規登録" : "ログイン" %></h2>
+      <form method="post" action="/<%= mode %>">
+        <label>
+          メールアドレス
+          <input name="email" type="email" maxlength="254" autocomplete="email" value="<%= email %>" required>
+        </label>
+        <label>
+          パスワード
+          <input name="password" type="password" minlength="8" autocomplete="<%= mode === "register" ? "new-password" : "current-password" %>" required>
+        </label>
+        <% if (error) { %>
+          <p class="form-message error" role="alert"><%= error %></p>
+        <% } %>
+        <button type="submit"><%= mode === "register" ? "アカウントを作成" : "ログイン" %></button>
+      </form>
+
+      <p class="auth-switch">
+        <% if (mode === "register") { %>
+          すでに登録済みの方は<a href="/login">ログイン</a>
+        <% } else { %>
+          初めて使う方は<a href="/register">新規登録</a>
+        <% } %>
+      </p>
+    </section>
+  </main>
+</body>
+</html>

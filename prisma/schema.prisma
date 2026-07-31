@@ -13,6 +13,18 @@ model Expense {
   category String   @db.VarChar(100)
   date     DateTime @db.Date
   memo     String?  @db.Text
+  userId   Int      @map("user_id")
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("expenses")
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique @db.VarChar(254)
+  passwordHash String    @map("password_hash") @db.VarChar(100)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  expenses     Expense[]
+
+  @@map("users")
 }

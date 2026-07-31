@@ -32,7 +32,76 @@ select {
 }
 
 .hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
   margin-bottom: 30px;
+}
+
+.account-menu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #68736d;
+  font-size: 0.82rem;
+}
+
+.account-menu form {
+  display: block;
+}
+
+.logout-button {
+  min-height: 36px;
+  margin: 0;
+  padding: 7px 13px;
+  border: 1px solid #cad5cd;
+  color: #3e6650;
+  font-size: 0.78rem;
+  background: #fff;
+}
+
+.logout-button:hover {
+  color: #fff;
+  background: #3e6650;
+}
+
+.auth-page {
+  display: grid;
+  place-items: center;
+  padding: 32px 0;
+}
+
+.auth-container {
+  width: min(460px, calc(100% - 32px));
+}
+
+.auth-card h1 {
+  margin-bottom: 12px;
+  font-size: clamp(2rem, 9vw, 3rem);
+}
+
+.auth-description {
+  margin-bottom: 30px;
+  color: #68736d;
+  line-height: 1.7;
+}
+
+.auth-card h2 {
+  margin-bottom: 18px;
+}
+
+.auth-switch {
+  margin: 24px 0 0;
+  color: #68736d;
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.auth-switch a {
+  margin-left: 6px;
+  color: #3e6650;
+  font-weight: 700;
 }
 
 .eyebrow {
@@ -523,6 +592,16 @@ button:disabled {
   .page {
     width: min(100% - 28px, 560px);
     padding-top: 34px;
+  }
+
+  .hero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .account-menu {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .dashboard-grid {
