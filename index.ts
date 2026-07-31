@@ -103,6 +103,23 @@ app.post("/expenses", async (req, res) => {
   res.status(201).json(expense);
 });
 
+app.delete("/expenses/:id", async (req, res) => {
+  const idText = String(req.params.id ?? "");
+  const id = Number(idText);
+
+  if (!/^\d+$/.test(idText) || !Number.isSafeInteger(id) || id <= 0) {
+    return res.status(400).json({ message: "支出IDが正しくありません。" });
+  }
+
+  const result = await prisma.expense.deleteMany({ where: { id } });
+
+  if (result.count === 0) {
+    return res.status(404).json({ message: "削除する支出が見つかりません。" });
+  }
+
+  res.json({ message: "支出を削除しました。" });
+});
+
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
   console.error(error);
   res.status(500).json({ message: "サーバーでエラーが発生しました。" });

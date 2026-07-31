@@ -188,8 +188,41 @@ const renderExpenseItems = (expenses) => {
     amount.className = "expense-amount";
     amount.textContent = formatMoney(expense.amount);
 
+    const actions = document.createElement("div");
+    actions.className = "expense-actions";
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "delete-button";
+    deleteButton.textContent = "削除";
+    deleteButton.setAttribute(
+      "aria-label",
+      `${expense.category} ${formatMoney(expense.amount)}を削除`,
+    );
+
+    deleteButton.addEventListener("click", async () => {
+      const isConfirmed = window.confirm(
+        `${formatDate(expense.date)}の${expense.category}（${formatMoney(expense.amount)}）を削除しますか？`,
+      );
+
+      if (!isConfirmed) return;
+
+      deleteButton.disabled = true;
+
+      try {
+        await fetchJson(`/expenses/${expense.id}`, { method: "DELETE" });
+        await loadDashboard();
+      } catch (error) {
+        window.alert(
+          error instanceof Error ? error.message : "削除できませんでした。",
+        );
+        deleteButton.disabled = false;
+      }
+    });
+
     details.append(category, meta);
-    item.append(details, amount);
+    actions.append(amount, deleteButton);
+    item.append(details, actions);
     expenseList.append(item);
   });
 };

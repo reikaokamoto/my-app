@@ -459,10 +459,39 @@ button:disabled {
   white-space: nowrap;
 }
 
-.expense-amount {
+.expense-actions {
+  display: flex;
   flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.expense-amount {
   font-size: 1.05rem;
   font-weight: 800;
+}
+
+.delete-button {
+  min-height: 34px;
+  margin: 0;
+  padding: 6px 11px;
+  border: 1px solid #e4aaa3;
+  border-radius: 9px;
+  color: #ad443a;
+  font-size: 0.75rem;
+  background: #fff;
+}
+
+.delete-button:hover {
+  border-color: #c96b60;
+  color: #92362e;
+  background: #fff2f0;
+  transform: none;
+}
+
+.delete-button:focus-visible {
+  outline: 3px solid rgb(178 72 61 / 18%);
+  outline-offset: 2px;
 }
 
 .empty-message {
