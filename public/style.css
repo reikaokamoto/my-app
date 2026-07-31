@@ -182,6 +182,7 @@ button:disabled {
 
 .section-heading {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
@@ -233,20 +234,30 @@ button:disabled {
 }
 
 .donut-center {
+  position: absolute;
   z-index: 1;
-  display: grid;
-  gap: 6px;
-  text-align: center;
+  inset: 0;
+  pointer-events: none;
 }
 
 .donut-center span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -21px;
   color: #7a857e;
   font-size: 0.78rem;
+  transform: translate(-50%, -100%);
 }
 
 .donut-center strong {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max-content;
   font-size: clamp(1.35rem, 2.8vw, 2rem);
   letter-spacing: -0.04em;
+  transform: translate(-50%, -50%);
 }
 
 .category-legend {
@@ -289,13 +300,13 @@ button:disabled {
   align-items: end;
   min-height: 280px;
   padding: 16px 8px 0;
+  border-bottom: 1px solid #dce2dd;
   background: repeating-linear-gradient(
     to bottom,
     transparent 0,
     transparent 54px,
     #edf0ed 55px
   );
-  border-bottom: 1px solid #dce2dd;
 }
 
 .month-bar {
@@ -327,7 +338,7 @@ button:disabled {
   overflow: hidden;
   flex-direction: column-reverse;
   justify-content: flex-start;
-  border-radius: 9px 9px 3px 3px;
+  border-radius: 0;
 }
 
 .bar-segment {
@@ -354,8 +365,66 @@ button:disabled {
   gap: 6px;
 }
 
+.list-card {
+  display: flex;
+  overflow: hidden;
+  min-height: 320px;
+  flex-direction: column;
+}
+
+.expense-month-tabs {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  overflow-x: auto;
+  margin: -2px 0 8px;
+  padding: 2px 0 10px;
+  scrollbar-width: thin;
+}
+
+.expense-month-tab {
+  flex: 0 0 auto;
+  min-height: 34px;
+  margin: 0;
+  padding: 7px 13px;
+  border: 1px solid #d9e0da;
+  border-radius: 999px;
+  color: #607068;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: #f7f9f7;
+  white-space: nowrap;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.expense-month-tab:hover {
+  border-color: #a6b8ac;
+  color: #355b46;
+  background: #eef4ef;
+  transform: none;
+}
+
+.expense-month-tab.is-active {
+  border-color: #3e6650;
+  color: #fff;
+  background: #3e6650;
+}
+
+.expense-month-tab:focus-visible {
+  outline: 3px solid rgb(76 119 94 / 22%);
+  outline-offset: 2px;
+}
+
 .expense-list {
   display: grid;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 8px;
+  align-content: start;
+  scrollbar-gutter: stable;
 }
 
 .expense-item {
@@ -449,6 +518,8 @@ button:disabled {
 
   .list-card {
     order: 4;
+    height: min(520px, calc(100vh - 80px));
+    min-height: 360px;
   }
 
   .card {
