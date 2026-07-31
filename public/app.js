@@ -7,12 +7,15 @@ const submitButton = document.querySelector("#submit-button");
 const formMessage = document.querySelector("#form-message");
 const expenseList = document.querySelector("#expense-list");
 const expenseCount = document.querySelector("#expense-count");
+const expenseMonthTabs = document.querySelector("#expense-month-tabs");
 const monthlyTotal = document.querySelector("#monthly-total");
 const donutRing = document.querySelector("#donut-ring");
 const categoryLegend = document.querySelector("#category-legend");
 const chartMonth = document.querySelector("#chart-month");
 const monthlyChart = document.querySelector("#monthly-chart");
 const monthlyLegend = document.querySelector("#monthly-legend");
+const monthlyCard = document.querySelector(".monthly-card");
+const listCard = document.querySelector(".list-card");
 
 const CATEGORY_COLORS = {
   食費: "#ff8a65",
@@ -28,6 +31,9 @@ const today = new Date();
 const localToday = new Date(today.getTime() - today.getTimezoneOffset() * 60_000)
   .toISOString()
   .slice(0, 10);
+const currentMonth = localToday.slice(0, 7);
+let selectedExpenseMonth = currentMonth;
+
 dateInput.value = localToday;
 
 const formatMoney = (amount) =>
@@ -62,6 +68,28 @@ const getRecentMonths = () =>
     const date = new Date(today.getFullYear(), today.getMonth() - monthsAgo, 1);
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
   });
+
+const getExpenseMonths = (expenses) => {
+  const recordedMonths = expenses
+    .map((expense) => expense.date.slice(0, 7))
+    .filter((month) => /^\d{4}-\d{2}$/.test(month));
+  const boundaryMonths = [...recordedMonths, currentMonth].sort();
+  const [firstMonth] = boundaryMonths;
+  const lastMonth = boundaryMonths.at(-1);
+  const [firstYear, firstMonthNumber] = firstMonth.split("-").map(Number);
+  const [lastYear, lastMonthNumber] = lastMonth.split("-").map(Number);
+  const firstIndex = firstYear * 12 + firstMonthNumber - 1;
+  const lastIndex = lastYear * 12 + lastMonthNumber - 1;
+  const months = [];
+
+  for (let index = lastIndex; index >= firstIndex; index -= 1) {
+    const year = Math.floor(index / 12);
+    const month = (index % 12) + 1;
+    months.push(`${year}-${String(month).padStart(2, "0")}`);
+  }
+
+  return months;
+};
 
 const summarizeByCategory = (expenses, month) => {
   const totals = new Map();
@@ -117,19 +145,31 @@ const createLegendItem = ({ category, amount }, showAmount = true) => {
   return item;
 };
 
-const renderExpenses = (expenses) => {
-  expenseList.replaceChildren();
-  expenseCount.textContent = `${expenses.length}件`;
+const renderExpenseItems = (expenses) => {
+  const monthExpenses = expenses
+    .filter((expense) => expense.date.slice(0, 7) === selectedExpenseMonth)
+    .sort(
+      (first, second) =>
+        second.date.localeCompare(first.date) ||
+        Number(second.id ?? 0) - Number(first.id ?? 0),
+    );
 
-  if (expenses.length === 0) {
+  expenseList.replaceChildren();
+  expenseCount.textContent = `${monthExpenses.length}件`;
+  expenseList.setAttribute(
+    "aria-label",
+    `${formatMonth(selectedExpenseMonth)}の支出`,
+  );
+
+  if (monthExpenses.length === 0) {
     const empty = document.createElement("p");
     empty.className = "empty-message";
-    empty.textContent = "まだ支出はありません。最初の記録を追加しましょう。";
+    empty.textContent = "記録がありません。";
     expenseList.append(empty);
     return;
   }
 
-  expenses.forEach((expense) => {
+  monthExpenses.forEach((expense) => {
     const item = document.createElement("article");
     item.className = "expense-item";
 
@@ -154,8 +194,41 @@ const renderExpenses = (expenses) => {
   });
 };
 
+const renderExpenses = (expenses) => {
+  const months = getExpenseMonths(expenses);
+
+  if (!months.includes(selectedExpenseMonth)) {
+    selectedExpenseMonth = months[0];
+  }
+
+  expenseMonthTabs.replaceChildren();
+
+  months.forEach((month) => {
+    const tab = document.createElement("button");
+    const isSelected = month === selectedExpenseMonth;
+
+    tab.type = "button";
+    tab.className = "expense-month-tab";
+    tab.textContent = formatMonth(month);
+    tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-selected", String(isSelected));
+    tab.classList.toggle("is-active", isSelected);
+
+    tab.addEventListener("click", () => {
+      selectedExpenseMonth = month;
+      renderExpenses(expenses);
+      expenseMonthTabs
+        .querySelector('[aria-selected="true"]')
+        ?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    });
+
+    expenseMonthTabs.append(tab);
+  });
+
+  renderExpenseItems(expenses);
+};
+
 const renderDonut = (expenses) => {
-  const currentMonth = localToday.slice(0, 7);
   const categories = summarizeByCategory(expenses, currentMonth);
   const total = categories.reduce((sum, category) => sum + category.amount, 0);
 
@@ -254,11 +327,24 @@ const renderMonthlyChart = (expenses) => {
   );
 };
 
+const alignListCardHeight = () => {
+  listCard.style.height = "";
+
+  if (window.matchMedia("(max-width: 720px)").matches) return;
+
+  window.requestAnimationFrame(() => {
+    const monthlyBottom = monthlyCard.getBoundingClientRect().bottom;
+    const listTop = listCard.getBoundingClientRect().top;
+    listCard.style.height = `${Math.max(monthlyBottom - listTop, 320)}px`;
+  });
+};
+
 const loadDashboard = async () => {
   const expenses = await fetchJson("/expenses");
   renderExpenses(expenses);
   renderDonut(expenses);
   renderMonthlyChart(expenses);
+  alignListCardHeight();
 };
 
 const showLoadError = () => {
@@ -267,6 +353,7 @@ const showLoadError = () => {
     '<p class="empty-message error">データを読み込めませんでした。</p>';
   monthlyChart.innerHTML =
     '<p class="empty-message error">グラフを読み込めませんでした。</p>';
+  alignListCardHeight();
 };
 
 form.addEventListener("submit", async (event) => {
@@ -303,4 +390,5 @@ form.addEventListener("submit", async (event) => {
   }
 });
 
+window.addEventListener("resize", alignListCardHeight);
 loadDashboard().catch(showLoadError);
