@@ -11,66 +11,92 @@
 <body>
   <main class="page">
     <header class="hero">
-      <div>
-        <p class="eyebrow">MY EXPENSE TRACKER</p>
-        <h1>わたしの家計簿</h1>
-        <p class="subtitle">今日使ったお金を、かんたんに記録。</p>
-      </div>
-      <section class="summary" aria-labelledby="summary-title">
-        <p id="summary-title">今月の支出</p>
-        <strong id="monthly-total">読み込み中...</strong>
-      </section>
+      <p class="eyebrow">MY EXPENSE TRACKER</p>
+      <h1>わたしの家計簿</h1>
+      <p class="subtitle">今日使ったお金を、かんたんに記録。</p>
     </header>
 
-    <div class="content-grid">
-      <section class="card form-card" aria-labelledby="form-title">
-        <h2 id="form-title">支出を追加</h2>
-        <form id="expense-form">
-          <label>
-            金額
-            <span class="amount-input">
-              <input id="amount" name="amount" type="number" min="1" step="1" placeholder="1200" required>
-              <span>円</span>
-            </span>
-          </label>
+    <div class="dashboard-grid">
+      <div class="dashboard-column">
+        <section class="card form-card" aria-labelledby="form-title">
+          <h2 id="form-title">支出を追加</h2>
+          <form id="expense-form">
+            <label>
+              金額
+              <span class="amount-input">
+                <input id="amount" name="amount" type="number" min="1" step="1" placeholder="1200" required>
+                <span>円</span>
+              </span>
+            </label>
 
-          <label>
-            カテゴリ
-            <select id="category" name="category" required>
-              <option value="">選択してください</option>
-              <option value="食費">食費</option>
-              <option value="交通費">交通費</option>
-              <option value="日用品">日用品</option>
-              <option value="娯楽">娯楽</option>
-              <option value="光熱費">光熱費</option>
-              <option value="その他">その他</option>
-            </select>
-          </label>
+            <label>
+              カテゴリ
+              <select id="category" name="category" required>
+                <option value="">選択してください</option>
+                <option value="食費">食費</option>
+                <option value="交通費">交通費</option>
+                <option value="日用品">日用品</option>
+                <option value="娯楽">娯楽</option>
+                <option value="光熱費">光熱費</option>
+                <option value="その他">その他</option>
+              </select>
+            </label>
 
-          <label>
-            日付
-            <input id="date" name="date" type="date" required>
-          </label>
+            <label>
+              日付
+              <input id="date" name="date" type="date" required>
+            </label>
 
-          <label>
-            メモ <span class="optional">任意</span>
-            <input id="memo" name="memo" type="text" maxlength="500" placeholder="ランチ、電車代など">
-          </label>
+            <label>
+              メモ <span class="optional">任意</span>
+              <input id="memo" name="memo" type="text" maxlength="500" placeholder="ランチ、電車代など">
+            </label>
 
-          <button id="submit-button" type="submit">記録する</button>
-          <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
-        </form>
-      </section>
+            <button id="submit-button" type="submit">記録する</button>
+            <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+          </form>
+        </section>
 
-      <section class="card list-card" aria-labelledby="list-title">
-        <div class="section-heading">
-          <h2 id="list-title">支出一覧</h2>
-          <span id="expense-count"></span>
-        </div>
-        <div id="expense-list" class="expense-list">
-          <p class="empty-message">読み込み中...</p>
-        </div>
-      </section>
+        <section class="card monthly-card" aria-labelledby="monthly-title">
+          <div class="section-heading">
+            <h2 id="monthly-title">月別の支出</h2>
+            <span>直近3か月</span>
+          </div>
+          <div id="monthly-chart" class="monthly-chart" aria-label="直近3か月のカテゴリ別支出">
+            <p class="empty-message">読み込み中...</p>
+          </div>
+          <div id="monthly-legend" class="chart-legend"></div>
+        </section>
+      </div>
+
+      <div class="dashboard-column">
+        <section class="card donut-card" aria-labelledby="donut-title">
+          <div class="section-heading">
+            <h2 id="donut-title">今月の支出</h2>
+            <span id="chart-month"></span>
+          </div>
+          <div class="donut-layout">
+            <div class="donut-chart">
+              <div id="donut-ring" class="donut-ring" aria-hidden="true"></div>
+              <div class="donut-center">
+                <span>合計</span>
+                <strong id="monthly-total">読み込み中...</strong>
+              </div>
+            </div>
+            <div id="category-legend" class="category-legend"></div>
+          </div>
+        </section>
+
+        <section class="card list-card" aria-labelledby="list-title">
+          <div class="section-heading">
+            <h2 id="list-title">支出一覧</h2>
+            <span id="expense-count"></span>
+          </div>
+          <div id="expense-list" class="expense-list">
+            <p class="empty-message">読み込み中...</p>
+          </div>
+        </section>
+      </div>
     </div>
   </main>
 </body>
